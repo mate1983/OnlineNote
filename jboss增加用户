@@ -1,0 +1,14 @@
+访问该Web服务器时，提示新增用户。可在服务端执行add-user.bat / add-user.sh 来添加管理员用户。
+ 
+./add-user.sh
+What type of user do you wish to add?
+ a) Management User (mgmt-users.properties)
+ b) Application User (application-users.properties)
+(a):
+回车后
+ 
+Enter the details of the new user to add.
+Realm (ManagementRealm) :                         //回车，选用默认
+Username :                                        //填写管理员用户名
+Password :
+Re-enter Password :
