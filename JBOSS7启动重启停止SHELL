@@ -1,0 +1,61 @@
+分享一个jboss7 start|stop|restart的shell,很方便.
+#!/bin/bash
+#/usr/local/jboss-as-7.1.1.Final/bin/jboss-cli.sh --connect command=:reload
+
+#chkconfig: 345 99 10
+#description: JBoss auto start-stop script.
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Get config.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "${NETWORKING}" = "no" ] && exit 0
+
+### CHANGE THE STARTUP PATH TO YOUR START SCRIPT ###
+export JAVA_HOME='/usr/java/jdk1.6.0_12'
+jboss7BinPath='/usr/local/jboss-as-7.1.1.Final/bin'
+#startup='/usr/local/jboss-as-7.1.1.Final/bin/standalone.sh > /dev/null 2> /dev/null &'
+startup='nohup ./standalone.sh &'
+#shutdown='killall java'
+shutdown='./jboss-cli.sh --connect command=:shutdown'
+
+start(){
+echo -n $"Starting JBoss7 service: "
+cd $jboss7BinPath
+$startup
+RETVAL=$?
+echo
+}
+
+stop(){
+action $"Stopping JBoss7 service: " 
+cd $jboss7BinPath
+$shutdown
+RETVAL=$?
+echo
+}
+
+restart(){
+stop
+sleep 10
+start
+}
+
+# See how we were called.
+case "$1" in
+start)
+start
+;;
+stop)
+stop
+;;
+restart)
+restart
+;;
+*)
+echo $"Usage: $0 {start|stop|restart}"
+exit 1
+esac
