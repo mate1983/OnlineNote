@@ -1,0 +1,7 @@
+http://wenku.baidu.com/link?url=IcRspUo8iaiAxAutp14vBYfQZTCDzvFldIB7KK7qnrRiLuyrRm-qwEYPmHUIpCQpcK6W978OK1rm10uo0fdQOtwPUZkUL6e2Zy7-yCT3mA7
+
+生成密钥  1. 进入server1.  2. 执行如下命令生成公钥和私钥.  $ ssh-keygen -t rsa  3. 以下步骤均采用默认操作，直接回车. 
+Generating public/private rsa key pair.  Enter file in which to save the key (/home/oracle/.ssh/id_rsa):  Enter passphrase (empty for no passphrase):  Enter same passphrase again:   Your identification has been saved in /home/oracle/.ssh/id_rsa. Your public key has been saved in /home/oracle/.ssh/id_rsa.pub. The key fingerprint is: 
+【ssh实现linux无密码访问】
+  3   
+2b:93:39:5e:e8:70:67:66:06:b1:e5:c3:1d:16:d3:ea oracle@test  4. 进入~/.ssh目录，会发现生成了两个文件：id_rsa、id_rsa.pub.其中id_rsa是 私钥文件，id_rsa.pub是公钥文件. 5. 进入server2.  6. 执行如下命令生成密钥.  # ssh-keygen -t rsa 7. 如3中，均采用默认操作.  8. 进入~/.ssh目录，同样也生成了两个文件：id_rsa、id_rsa.pub. 
