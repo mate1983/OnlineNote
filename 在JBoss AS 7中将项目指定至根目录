@@ -1,0 +1,19 @@
+1.创建WEB-INF/jboss-web.xml文件，全部内容如下： 
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-web>
+    <context-root>/</context-root>
+</jboss-web>
+
+
+2.修改/jboss-as-7.0.0.Final/standalone/configuration/standalone.xml文件 
+在文件的最后找到 
+<subsystem xmlns="urn:jboss:domain:web:1.0" default-virtual-server="default-host">
+  <connector name="http" scheme="http" protocol="HTTP/1.1" socket-binding="http"/>
+  <virtual-server name="default-host" enable-welcome-root="true">
+    <alias name="localhost" />
+    <alias name="example.com" />
+  </virtual-server>
+</subsystem>
+
+将enable-welcome-root="true"删除 
+否则启动时会抛出"Child container with name  already exists"错误
