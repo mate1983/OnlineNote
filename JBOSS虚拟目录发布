@@ -1,0 +1,5 @@
+ 在standalone.xml中增加发布路径，如下：
+ <subsystem xmlns="urn:jboss:domain:deployment-scanner:1.1">
+            <deployment-scanner path="deployments" relative-to="jboss.server.base.dir" scan-interval="5000"/>
+            <deployment-scanner name="mydeployments" path="/home/www/appsystems/admin-stg/apps" scan-interval="5000" auto-deploy-zipped="true" auto-deploy-exploded="true"/>
+        </subsystem>
