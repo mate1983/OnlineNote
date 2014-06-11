@@ -1,3 +1,4 @@
+http://www.tuicool.com/articles/M7ZR3y
 内容概述
 
 JBoss7/WildFly设底层框架一大亮点的Module class loading，及每一个相对独立的模块看作一个Module，每个Module都有自己的class loader，Module之间可以相互依赖，如下图：
