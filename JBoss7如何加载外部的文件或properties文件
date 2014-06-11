@@ -1,0 +1,89 @@
+内容概述
+
+JBoss7/WildFly设底层框架一大亮点的Module class loading，及每一个相对独立的模块看作一个Module，每个Module都有自己的class loader，Module之间可以相互依赖，如下图：
+
+
+
+当JBoss7安装完成后，JBOSS_HOME/modules目录下存在许多目录，每个目录都有一个module.xml文件，代表一个Module，我们也叫他静态Module，同样部署与服务器之上的war，ear也是一个Module，叫做动态Module，详细 点击查看此文档 。 
+在之前的版本的JBoss中，如JBoss 6, JBoss 5, JBoss 4中，我们经常需要这样的操作，在JBOSS_HOME/server/$PROFILE/conf下放置一个文件或一个properties文件，则在部署的war，ear中通过ClassLoader().getResourceAsStream（“文件名”）可以获取文件内容，这是因为之前的版本的JBoss中共享一个class loader，JBOSS_HOME/server/$PROFILE/conf下文件在classpath之下,而在JBoss7/WildFly中没有共享的class loader，我们需要咱们完成加载外部的文件或properties文件呢，本文解决这个问题。
+
+本文内容包括如下：
+
+给出JBoss7/WildFly如何加载外部的文件或properties文件步骤（将文件或properties定义在一个独立的Module中）
+一个简单示例（war应用中加载读取外部的文件个properties） 
+JBoss7/WildFly如何加载外部的文件或properties文件步骤
+
+1. 创建一个新Module
+
+jboss-as-7/modules/com/yourcompany/configuration/main/module.xml
+
+module.xml内容如下
+<?xml version="1.0" encoding="UTF-8"?>  
+    <module xmlns="urn:jboss:module:1.1" name="com.mycompany.configuration">  
+        <resources>  
+            <resource-root path="."/>  
+        </resources>  
+    </module>
+
+在jboss-as-7/modules/com/yourcompany/configuration/main目录下防止要加载的文件
+2. 在自己module下定义文件jboss-deployment-structure.xml，此文件置于war 的WEB-INF或ear的META-INF下，jboss-deployment-structure.xml内容如下：
+
+<?xml version="1.0" encoding="UTF-8"?>  
+    <jboss-deployment-structure>  
+      <deployment>  
+        <dependencies>  
+          <module name="com.mycompany.configuration" />  
+        </dependencies>  
+      </deployment>  
+    </jboss-deployment-structure>
+
+3. 在war或ear中通过class loader可以获取定义的文件如下：
+InputStream settingsStream = this.getClass().getClassLoader().getResourceAsStream("settings.properties");
+
+一个简单示例
+
+1. 在jboss-as-7/modules/org/jboss/modules/props/main下创建module.xml添加内容如下：
+
+<?xml version="1.0" encoding="UTF-8"?>
+      <module xmlns="urn:jboss:module:1.1" name="org.jboss.modules.props">
+      <resources>
+          <resource-root path="."/>
+      </resources>
+      <dependencies>
+      </dependencies>
+   </module>
+
+2. 创建test.properties 和 test.conf文件在org/jboss/modules/props/main下，编辑test.properties文件添加内容如下：
+key=This is test props
+
+3. 下载14代码（详细参照 软件安装及资料下载 ）编译生成modules-loadprops.war
+git  clone git@github.com:kylinsoong/csdn.git
+cd csdn/14
+mvn clean install
+
+4. 将modules-loadprops.war部署到JBoss7,启动JBoss7后访问 http://localhost:8080/modules-loadprops/ServiceModuleLoaderLoadProps
+我们会发现JBoss后台输出如下信息：
+
+22:15:56,049 INFO  [stdout] (http-/127.0.0.1:8080-1) Read test.properties Info: This is test props
+22:15:56,050 INFO  [stdout] (http-/127.0.0.1:8080-1) Print test.conf Path: file:/home/kylin/work/eap/jboss-eap-6.0/modules/org/jboss/modules/props/main/./test.conf
+分析代码我们可以发现WEB-INF下jboss-deployment-structure.xml内容如下：
+
+<?xml version="1.0" encoding="UTF-8"?>  
+<jboss-deployment-structure>
+    <deployment>
+        <dependencies>
+            <module name="org.jboss.modules.props" />
+        </dependencies>
+    </deployment>
+</jboss-deployment-structure>
+
+ModularLoadingProps.java内容如下：
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    InputStream in = ModularLoadingProps.class.getClassLoader().getResourceAsStream("test.properties");
+    Properties prop = new Properties();
+    prop.load(in);
+    System.out.println("Read test.properties Info: " + prop.get("key"));
+    URL url = ModularLoadingProps.class.getClassLoader().getResource("test.conf");
+    System.out.println("Print test.conf Path: " + url);
+    in.close();
+  }
