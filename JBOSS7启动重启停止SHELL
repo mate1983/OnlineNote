@@ -1,3 +1,7 @@
+多实体关闭相应的Jboss，需要用如下命令：
+boss-cli.sh --controller=localhost:9999 --connect command=:shutdown
+端口号为管理端口号
+
 分享一个jboss7 start|stop|restart的shell,很方便.
 #!/bin/bash
 #/usr/local/jboss-as-7.1.1.Final/bin/jboss-cli.sh --connect command=:reload
