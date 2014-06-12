@@ -1,0 +1,62 @@
+http://blog.csdn.net/superbirds/article/details/8243889
+
+1、经常可能要改动的 js, css.
+比如 一个html 文件， test.html 在 1.0版本中。可能是这样
+<script src="common.js"></script>
+修改后  v1.1版本：
+<script src="common.js"></script>
+<script src="foo.js"></script>
+新增加了一个foo.js  同时，也改动了common.js , 在common.js 中定义了新的类，并在foo.js 中使用了common.js.  
+在这种情况下如果以前用户浏览过 1.0版本的 html 文件，那么他的浏览器自动缓存了 common.js
+当他浏览新版本的时候，因为使用的是 v1.1的 foo.js 和 v1.0的 common.js ，这样将导致脚本出错。
+解决方法探讨：
+因为css,js 是通过 <script src=....> 这种方式加载的，所以，很难使用 asp 的那种服务器端禁止缓存的办法。也很难使用ajax的通过设置 http请求头的办法禁止使用缓存。
+看来随机数是个好办法。
+
+
+[javascript] view plaincopy
+// 方法一：   
+document.write( " <script src='test.js?rnd= " + Math.random() + " '></s " + " cript> " )  
+// 方法二：   
+var  js = document.createElement( " script " )  
+js.src = " test.js " + Math.random()  
+document.body.appendChild(js)  
+
+
+但是，如果采用随机数的话， js文件将永远得不到缓存，每次都必须重新从服务器加载，即使没有任何更改。
+大家如果经常上国外网站的话，可以看到他们通常采用这样的方式来解决：
+<script src="test.js?ver=113"></script>
+其中 ver=113 的 113就是版本号，一般都是采用 CVS 或其他工具生成的开发版本号。
+这样真正做到了应该缓存的时候缓存静态文件，当版本有更新的时候从获取最新的版本，并更新缓存。
+对于图像 <img src="test.jps?ver=在CVS的版本号"> 来有效利用和更新缓存.
+
+2、在你引用JS文件的地方加上，如下：
+[javascript] view plaincopy
+//09年08月14日修改  
+var now=new Date();  
+var number = now.getYear().toString()+now.getMonth().toString()+now.getDate().toString()+now.getHours().toString()+now.getMinutes().toString()+now.getSeconds().toString();  
+document.write("\<script language=\"javascript\" type=\"text/javascript\" src=\"js/YearReportLuRu.js?"+number+"\"><\/script\>");  
+//alert("\<script language=\"javascript\" type=\"text/javascript\" src=\"js/YearReportLuRu.js?"+number+"\"><\/script\>");//测试  
+
+
+类似这种形式：js/YearReportLuRu.js?20100408154456，这样浏览器就会以为每次引用的js文件都是不同的，当然我们的YearReportLuRu.js对后面的动态数并不进行处理。
+----------------------------------------------------------------------------------------------------------------------------------------------
+3、就是在客户端页面文件头加上：
+<%--不进行缓存设置--%>
+<meta http-equiv="pragma"   content="no-cache" />   
+<meta http-equiv="Cache-Control" content="no-cache,must-revalidate" />   
+<meta http-equiv="expires" content="Wed,26 Feb 1997 08:21:57 GMT" /> 
+<%-- --------------------- --%>
+服务器端加上：
+[vb] view plaincopy
+Response.Buffer = true;  
+Response.ExpiresAbsolute = System.DateTime.Now.AddSeconds(-1);  
+Response.Expires = 0;  
+Response.CacheControl = "no-cache";  
+
+
+这种办法我在程序中应用过，但是有些用户还是存在缓存现象，个人觉得还没最终解决。
+4、还有别的办法，在此汇总下，我本人没用过，只是网上找到的，如下：
+需要服务器上设置允许缓存，这样客户端才会根据客户端的设置来缓存一些静态文件（如：js、css、图片）。
+在IIS里，可以在站点属性的“HTTP头”里设置“启用内容过期”，来控制客户端缓存的时间。（如下图）
+这样HTTP返回的HTTP头是304，启用缓存可以大大提高用户体验，另外也建议启用http压缩，来优化网站。
