@@ -1,0 +1,30 @@
+http://www.blogjava.net/zhyiwww/archive/2011/09/02/357823.html
+
+命令行和ant脚本的参数传递
+
+比如在执行build.xml的某些任务时候，需要从外面的命令行传递参数给ant脚本。
+可以通过以下的方式进行参数传入：
+ant -f ../../build.xml idc.$type.$ismenu.war -Dparent_version=$parent_version -Dson_version=$son_version
+
+使用方法：    
+    在build.xml文件定义如下属性：
+   <property name="parent.version" value="${parent_version}" />
+   <property name="son.version" value="${son_version}" />
+
+在任务中使用：
+
+        <target name="war" depends="build.all">
+
+                <property name="war.name" value="${product.bin.dir}/${project.context}-${parent.version}-${current.date}.war"/>
+
+                <war destfile="${war.name}" webxml="${project.webroot}/WEB-INF/web.xml">
+                        <fileset dir="${project.webroot}">
+                                <include name="**/*"/>
+                        </fileset>
+                </war>
+        </target>
+
+红色字体部分，就可以实现从此参数取得值。
+
+通过以上方法，就可以从命令行中把参数传递入ant脚本。
+这样，就可以灵活的使用shell脚本和ant脚本的整合。实现更方便和灵活的功能。
