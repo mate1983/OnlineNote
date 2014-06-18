@@ -1,0 +1,22 @@
+        DataList list = productGroupDao.getProductByGroupId(externalProductDTO);
+				//属性包含Filter
+				String[] properties = {"idExternalProduct","productName","remark","nickName",
+									"createdDate","updatedDate","productImgPath","rePrice","oriPrice",
+									"merchantId","productSubtitle","cpsLink","externalCategoryId"};
+				SimplePropertyPreFilter includeFilter = new SimplePropertyPreFilter(ExternalProductDTO.class,properties);
+				//属性改名Filter
+				ExternalProductNameFilter nameTransFilter = new ExternalProductNameFilter();
+				//构造生成json的相关类:
+				//null字段输出、null字符串输出为空、日期格式化
+				SerializerFeature [] features = { SerializerFeature.WriteMapNullValue,
+												 SerializerFeature.WriteNullStringAsEmpty,
+												 SerializerFeature.WriteDateUseDateFormat};
+				SerializeWriter out = new SerializeWriter(features);				
+				JSONSerializer serializer = new JSONSerializer(out);				
+				serializer.getPropertyPreFilters().add(includeFilter);
+				serializer.getNameFilters().add(nameTransFilter);
+				serializer.setDateFormat("yyyyMMddHHmm");
+				
+				//生成json				
+				serializer.write(list.getNowlist());
+				String resultJson = out.toString();
