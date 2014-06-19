@@ -1,0 +1,642 @@
+http://blog.csdn.net/yuqinying112/article/details/7335416
+
+Spring的AOP配置
+
+1.先写一个普通类：
+
+package com.spring.aop;
+
+public class Common {
+ public void execute(String username,String password){
+     System.out.println("------------------普通类----------------");
+   }
+
+}
+
+2.写一个切面类，用于合法性校验和日志添加：
+
+package com.spring.aop;
+
+public class Check {
+ public void checkValidity(){
+     System.out.println("------------------验证合法性----------------");
+ }
+
+public void addLog(JoinPoint j){
+  System.out.println("------------------添加日志----------------");
+  Object obj[] = j.getArgs();
+   for(Object o :obj){
+    System.out.println(o);
+   }
+   System.out.println("========checkSecurity=="+j.getSignature().getName());//这个是获得方法名
+ }
+
+}
+3.配置AOP，使用XML方式：（注意红色标志的内容）
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+ xmlns="http://www.springframework.org/schema/beans"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:aop="http://www.springframework.org/schema/aop"
+ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+ http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+  <bean id="common" class="com.spring.aop.Common"/>
+  <bean id="check" class="com.spring.aop.Check"/>
+   
+  <aop:config>
+    <aop:aspect id="myAop" ref="check">
+      <aop:pointcut id="target" expression="execution(* com.spring.aop.Common.execute(..))"/>
+      <aop:before method="checkValidity" pointcut-ref="target"/>
+      <aop:after method="addLog" pointcut-ref="target"/>
+    </aop:aspect>
+  </aop:config>
+</beans>
+注意：
+
+execution(* com.spring.aop.*.*(..))"/
+
+这样写应该就可以了
+
+这是com.aptech.jb.epet.dao.hibimpl 包下所有的类的所有方法。。
+
+第一个*代表所有的返回值类型
+
+第二个*代表所有的类
+
+第三个*代表类所有方法
+
+最后一个..代表所有的参数。
+
+ 
+
+4.最后写一个测试：
+
+package com.spring.aop;
+
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class Client {
+ public static void main(String[] args) {
+     BeanFactory factory=new ClassPathXmlApplicationContext("applicationContext-aop.xml");
+     Common c=(Common) factory.getBean("common");
+     c.execute("zhengjunhua","zhengjunhua");
+
+   }
+}
+
+注意：
+
+需要添加三个包：spring-aop.jar , aspectjrt.jar ，aspectjweaver.jar，否则会报错。
+
+输出结果：
+
+------------------验证合法性----------------
+------------------普通类----------------
+------------------添加日志----------------
+zhengjunhua
+zhengjunhua
+========checkSecurity==execute
+
+Spring AOP配置选项
+
+Spring实现动态代理配置是有两种配置文件：
+
+1、   xml文件方式；
+
+2、   annotation方式(使用AspectJ类库实现的。)
+
+一、       AOP配置annotation方式(一)  搭建annotation开发环境
+首先:需要在配置文件中加入@AspectJ标签
+
+<aop:aspectj-autoproxy/>
+
+自动帮我产生代理
+
+注意：Spring默认并没有加入aop的xsd文件，因为我们需要手动加入(红色部分)
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xmlns:aop="http://www.springframework.org/schema/aop"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+
+           http://www.springframework.org/schema/context
+
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+
+           http://www.springframework.org/schema/aop
+
+           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+    <context:annotation-config/>
+
+    <context:component-scan base-package="com.wjt276"/>
+
+    <aop:aspectj-autoproxy/>
+
+</beans>
+
+ 
+
+         另外需要引用aspectJ的jar包：
+
+                                                        aspectjweaver.jar
+
+                                                        aspectjrt.jar
+
+(二)  aspectJ类库
+AspectJ是一个专门用来实现动态代理(AOP编程)的类库
+
+AspectJ是面向切面编程的框架
+
+Spring使用就是这个类库实现动态代理的
+
+(三)  AOP的annotation实例
+要求：在执行save()方法之前加入日志逻辑
+
+1、   spring的配置文件同上面的
+
+2、   model类、dao层类、service层类都与上面天下一致
+
+3、   切面类(LogInterceptor)
+
+ 
+
+import org.aspectj.lang.annotation.Aspect;
+
+import org.aspectj.lang.annotation.Before;
+
+import org.springframework.stereotype.Component;
+
+@Aspect
+
+@Component
+
+public class LogInterceptor {
+
+ 
+
+    @Before("execution(public void com.wjt276.dao.impl.UserDaoImpl.save(com.wjt276.model.User))")
+
+    public void before(){
+
+       System.out.println("method start...");
+
+    }  
+
+}
+
+         结果：这样在运行public void com.wjt276.dao.impl.UserDaoImpl.save(com.wjt276.model.User)方法之前就会先执行这个逻辑了。
+
+    注意：
+
+    1、@Aspect：意思是这个类为切面类
+
+    2、@Componet：因为作为切面类需要Spring管理起来，所以在初始化时就需要将这个类初始化加入Spring的管理；
+
+    3、@Befoe：切入点的逻辑(Advice)
+
+    4、execution…:切入点语法
+
+ 
+
+(四) 
+三个连接点(切入点)
+
+AspectJ的专业术语
+1、  JoinPoint
+
+切入面
+
+连接点(切入点)
+
+ 
+
+
+程序执行过程
+
+2、  PointCut
+
+切入点人集合
+
+当需要定义一个切入点时，则需要使用这个
+
+@Pointcut("execution(* com.xyz.someapp.service.*.*(..))")
+
+  public void businessService() {}
+
+ 
+
+3、  Aspect
+
+切面
+
+4、  Advice
+
+切入点的逻辑
+
+例如上例中的@Before
+
+5、  Target
+
+被代理对象
+
+6、  Weave
+
+织入
+
+ 
+
+(五)  织入点语法
+1、    无返回值、com.wjt276.dao.impl.UserDaoImpl.save方法 参数为User
+
+execution(public void com.wjt276.dao.impl.UserDaoImpl.save(com.wjt276.model.User))
+
+2、    任何包、任何类、任何返回值、任何方法的任何参数
+
+execution(public * *(..))
+
+3、    任何包、任何类、任何返回值、任何set开头方法的任何参数
+
+execution(* set*(..))
+
+4、    任何返回值、com.xyz.service.AccountService类中的任何方法、任何参数
+
+execution(* com.xyz.service.AccountService.*(..))
+
+5、    任何返回值、com.xyz.service包中任何类中的任何方法、任何参数
+
+execution(* com.xyz.service.*.*(..))
+
+6、    任何返回值、com.xyz.service包中任何层次子包(..)、任何类、任何方法、任何参数
+
+execution(* com.xyz.service..*.*(..))
+
+7、    void 和 !void(非void)
+
+execution(public void com.xyz.service..*.*(..))
+
+execution(public !void com.xyz.service..*.*(..))
+
+注意：上以是AspectJ的织入点语法，Spring AOP也实现了自己的织入点语法,同样可以使用
+
+within(com.xyz.service.*)
+
+ 
+
+within(com.xyz.service..*)
+
+ 
+
+this(com.xyz.service.AccountService)
+
+ 
+
+target(com.xyz.service.AccountService)
+
+ 
+
+args(java.io.Serializable)
+
+ 
+
+@target(org.springframework.transaction.annotation.Transactional)
+
+ 
+
+@within(org.springframework.transaction.annotation.Transactional)
+
+ 
+
+@annotation(org.springframework.transaction.annotation.Transactional)
+
+ 
+
+@args(com.xyz.security.Classified)
+
+ 
+
+bean(tradeService)
+
+ 
+
+bean(*Service)
+
+(六)  Advice1、     @Before
+执行方法之前
+
+@Aspect
+
+public class BeforeExample {
+
+  @Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+
+  public void doAccessCheck() { // ... }}
+
+ 
+@Aspect
+
+public class BeforeExample {
+
+  @Before("execution(* com.xyz.myapp.dao.*.*(..))")
+
+  public void doAccessCheck() { // ... }}
+
+2、     @ AfterReturning
+方法正常执行完之后
+
+@Aspect
+
+public class AfterReturningExample {
+
+  @AfterReturning("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+
+  public void doAccessCheck() { // ... }}
+
+ 
+
+@Aspect
+
+public class AfterReturningExample {
+
+  @AfterReturning(
+
+    pointcut="com.xyz.myapp.SystemArchitecture.dataAccessOperation()",
+
+    returning="retVal")
+
+  public void doAccessCheck(Object retVal) { // ... }}
+
+3、     @ AfterThrowing
+方法抛出异常之后
+
+@Aspect
+
+public class AfterThrowingExample {
+
+  @AfterThrowing("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+
+  public void doRecoveryActions() { // ... }}
+
+ 
+
+@Aspect
+
+public class AfterThrowingExample {
+
+  @AfterThrowing(
+
+    pointcut="com.xyz.myapp.SystemArchitecture.dataAccessOperation()",
+
+    throwing="ex")
+
+  public void doRecoveryActions(DataAccessException ex) { // ... }}
+
+4、      @After (finally)
+方法抛出异常被catch之后，需要进行的部分(相当于finally功能)
+
+@Aspect
+
+public class AfterFinallyExample {
+
+  @After("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+
+  public void doReleaseLock() { // ... }}
+
+5、     @ Around
+在方法之前和之后都要加上
+
+但是需要一个参数ProceedingJoinPoint，并者需要Object retVal = pjp.proceed();
+
+和返回return retVal;
+
+@Aspect
+
+public class AroundExample {
+
+  @Around("com.xyz.myapp.SystemArchitecture.businessService()")
+
+  public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
+
+    // start stopwatch
+
+    Object retVal = pjp.proceed();
+
+    // stop stopwatch
+
+    return retVal; }}
+
+ 
+
+(七)  Pointcut
+当多个Advice个有相同的织入点。那么我们可以定义一个织入点集合，在需要使用的地方，调用就可以了。
+
+例如：
+
+@Aspect
+
+@Component
+
+public class LogInterceptor {
+
+ 
+
+    @Pointcut("execution(public * com.wjt276.dao..*.*(..))")
+
+    public void myMethod(){};
+
+   
+
+    @Before(value="myMethod()")
+
+    public void before(){
+
+       System.out.println("method start...");
+
+    }
+
+ 
+
+    @AfterReturning("myMethod()")
+
+    public void afterReturning(){
+
+       System.out.println("method after returning...");
+
+    }}
+
+注意：那个空方法，只是为了给Pointcut起个名字，以方便别处使用
+
+ 
+
+(八)    annotatin方式的AOP实例
+import org.aspectj.lang.ProceedingJoinPoint;
+
+import org.aspectj.lang.annotation.AfterReturning;
+
+import org.aspectj.lang.annotation.Around;
+
+import org.aspectj.lang.annotation.Aspect;
+
+import org.aspectj.lang.annotation.Before;
+
+import org.aspectj.lang.annotation.Pointcut;
+
+import org.springframework.stereotype.Component;
+
+ 
+
+@Aspect
+
+@Component
+
+public class LogInterceptor {
+
+ 
+
+    @Pointcut("execution(public * com.wjt276.dao..*.*(..))")
+
+    public void myMethod(){};
+
+   
+
+    @Before(value="myMethod()")
+
+    public void before(){
+
+       System.out.println("method start...");
+
+    }
+
+   
+
+    @AfterReturning("myMethod()")
+
+    public void afterReturning(){
+
+       System.out.println("method after returning...");
+
+    }
+
+   
+
+    @Around(value="myMethod()")
+
+    public void around(ProceedingJoinPoint pjp) throws Throwable{
+
+       //因为@around需要传入一个参数ProceedingJoinPoint进行前后加逻辑
+
+       System.out.println("method around start...");
+
+      
+
+       //在需要前后逻辑的中间加入下列语句。表示前后逻辑，可能会抛出异常Throwable。
+
+       pjp.proceed();
+
+       System.out.println("method around end...");
+
+    }
+
+}
+
+ 
+
+二、       AOP配置xml方式
+xml方式是我们以后使用的比较多的，因为当切面类我们没有源代码时、当我们使用第三方的切面类时，我就不能使用annotation的方式，而且如果使用annotation方式一但程序编译后就不可以修改了。如果使用xml方式就不一样了，我们只需要修改xml文件就可以了。
+
+xml方式与annotation的作用是一样。现在就是实例：
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xmlns:aop="http://www.springframework.org/schema/aop"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+
+           http://www.springframework.org/schema/context
+
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+
+           http://www.springframework.org/schema/aop
+
+           http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+    <context:annotation-config/>
+
+    <context:component-scan base-package="com.wjt276"/>    
+
+    <bean id="logInterceptor" class="com.wjt276.aop.LogInterceptor"></bean>
+
+    <aop:config>
+
+        <!-- <aop:pointcut >在此处定义的pointcut是全局的pointcut可以供所有的aspect使用
+
+             id:表示这个pointcut的名称，以方便使用-->
+
+        <aop:pointcut id="myMethod"
+
+                      expression="execution(public * com.wjt276.service..*.*(..))" />
+
+        <!--  <aop:aspect>表示定义一个切面类(这需要Spring初始化加入其管理)
+
+            id:切面类的名称，
+
+            ref:引用哪个bean(需要使用<bean>标签初始化)-->
+
+        <aop:aspect id="logAspect" ref="logInterceptor">
+
+            <!-- 在此处定义的pointcut是全局的pointcut只供当前的aspect使用
+
+                 id:表示这个pointcut的名称，以方便使用 -->
+
+            <aop:pointcut id="myMethod2"
+
+                      expression="execution(public * com.wjt276.service..*.*(..))" />
+
+            <!--
+
+                定义advice时的参数
+
+                method:切面逻辑的方法名称(切面类中的方法名)
+
+                pointcut-ref：表示引用哪个pointcut(要求已经在上面定义好了)
+
+                pointcut：定义一个pointcut    -->
+
+            <aop:before method="before" pointcut-ref="myMethod"/>
+
+            <aop:after-returning method="afterReturning" pointcut="execution(public * com.wjt276.service..*.*(..))"/>
+
+        </aop:aspect>
+
+    </aop:config>
+
+</beans>
+
+ 
+
+ 
+
+三、       AOP实现动态代理注意
+因为Spring要实现AOP(面向切面编程)，需要加入切面逻辑的类就会生成动态代理。在动态代理类中加入切面类从而实现面向切面编程，但生成动态代理存在以下注意事项：
+
+1、   被动态代理的类如果实现了某一个接口，那么Spring就会利用JDK类库生成动态代理。
+
+2、   如果被动态代理的类没有实现某一个接口，那么Spring就会利用CGLIB类库直接修改二进制码来生成动态代理(因为利用JDK生成动态代理的类必须实现一个接口)，需要在项目中引用CGLIB类库
