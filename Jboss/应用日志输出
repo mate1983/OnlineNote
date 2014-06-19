@@ -1,0 +1,61 @@
+jboss-deployment-structure.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure>
+    <deployment>
+        <exclusions>
+            <module name="org.apache.log4j" />
+            <module name="org.slf4j" />
+        </exclusions>
+    </deployment>
+</jboss-deployment-structure>
+
+log4j.properties
+
+# This is the configuring for logging displayed in the Application Server
+log4j.rootCategory=DEBUG, stdout, rollingFile, E 
+
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.Threshold=DEBUG
+log4j.appender.stdout.layout.ConversionPattern=%-23d{yyyy-MM-dd HH:mm:ss,S}|%-5p|%t| %m |%c(%L)%n
+log4j.appender.stdout.Encoding=UTF-8
+
+log4j.appender.rollingFile=org.apache.log4j.RollingFileAppender
+log4j.appender.rollingFile.Threshold=DEBUG
+log4j.appender.rollingFile.File=d:/logs/wltadmin.log
+log4j.appender.rollingFile.Append=true
+log4j.appender.rollingFile.MaxFileSize=10MB
+log4j.appender.rollingFile.MaxBackupIndex=100
+log4j.appender.rollingFile.layout=org.apache.log4j.PatternLayout
+log4j.appender.rollingFile.layout.ConversionPattern=%-23d{yyyy-MM-dd HH:mm:ss,S}|%-5p|%t| %m |%c(%L)%n
+
+log4j.appender.E=org.apache.log4j.DailyRollingFileAppender
+log4j.appender.E.File=d:/logs/error.log
+log4j.appender.E.Append=true
+log4j.appender.E.Threshold=ERROR
+log4j.appender.E.layout=org.apache.log4j.PatternLayout
+log4j.appender.E.layout.ConversionPattern =%-d{yyyy-MM-dd HH\:mm\:ss}  [ %t\:%r ] - [ %p ]  %m%n 
+log4j.appender.E.Encoding=UTF-8
+
+
+# Control logging for other open source packages
+log4j.logger.java.sql.Connection=DEBUG
+log4j.logger.java.sql.ResultSet=DEBUG
+log4j.logger.java.sql.PreparedStatement=DEBUG
+log4j.logger.org.springframework=INFO
+#log4j.logger.org=DEBUG
+#log4j.logger.org.xml.sax=DEBUG
+#log4j.logger.com.opensymphony.oscache=DEBUG
+
+Jar文件
+slf4j-log4j12-1.6.1.jar
+slf4j-api-1.6.1.jar
+log4j-1.2.17.jar
+commons-logging-1.0.4.jar
+
+代码：
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+Logger logger = LoggerFactory.getLogger(this.getClass());
+logger.info("--------------------------------TestLog.test 2 slf4j-----------");
