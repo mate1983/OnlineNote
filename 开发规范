@@ -1,0 +1,42 @@
+	所有的Model、Dao、Service、Action及Controller都用表名去掉wlt开头为主。如：
+VgustBespeakDAO
+VgustBespeakDAOImpl
+VgustBeSpeakService
+VgustBespeakServiceImpl
+VgustBespeakAction
+VgustBespeakActionImpl
+VgustBespeakDTO
+VgustBespeakController
+
+	所有的Controller的RequestMapping的url(功能点大部分用前面的表名去掉wlt,如果有些是多张表则用业务功能名),其中第一级的定义在类名上面，第二级定义在方法名前面：
+		列表的为：功能点\list
+		查看单笔记录：功能点\view		
+新增记录引入：功能点\addInput
+	     修改记录引入：功能点\editInput
+		新增保存记录：功能点\save
+		修改保存记录：功能点\update
+		删除记录：功能点\delete
+如：
+@Controller
+@RequestMapping(value = "/member")
+public class LoginController extends WltWebController
+
+@RequestMapping(value = "/list")
+public ModelAndView loginRequest(HttpServletRequest request, HttpServletResponse response)
+
+	所有的jsp命名规则把url的中间分隔去除，首字母大字如下：
+		功能点List
+		功能点View
+		功能点Form
+		功能点Add
+		功能点Delete
+如：
+		memberList.jsp
+		memberView.jsp
+		memberForm.jsp
+		memberAdd.jsp
+		memberDelete.jsp
+
+	4、Service的定义，名称直接用实现类名去掉Impl及首字母小写，如下：
+<bean id="synFactoryInfoService" class="com.pingan.wlt.life.core.service.impl.SynFactoryInfoServiceImpl" />
+Dao的定义与service类似
