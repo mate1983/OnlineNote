@@ -1,0 +1,2 @@
+TS-Jboss+IE+easyui-datebox 提交异常（2014-6-26）
+因easyui-datebox会动态增加两个input，然后改名，但是IE不允许改名，而Jboss不会过滤空名等于空值的参数，导致Spring mvc转换时异常。仅在三个条件同时存在时才会出现异常。
