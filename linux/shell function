@@ -1,0 +1,81 @@
+http://www.cnblogs.com/ggjucheng/archive/2012/11/01/2750125.html
+
+function 功能
+什么是『函数 (function)』功能啊？简单的说，其实， 函数可以在 shell script 当中做出一个类似自订运行命令的东西，最大的功能是， 可以简化我们很多的程序码～
+
+function 的语法是这样的：
+
+function fname() {
+    程序段
+}
+那个 fname 就是我们的自订的运行命令名称～而程序段就是我们要他运行的内容了。 要注意的是，因为 shell script 的运行方式是由上而下，由左而右， 因此在 shell script 当中的 function 的配置一定要在程序的最前面， 这样才能够在运行时被找到可用的程序段喔！
+
+好～我们将 sh12.sh 改写一下，自订一个名为 printit 的函数来使用喔：
+
+复制代码
+[root@www scripts]# vi sh12-2.sh
+#!/bin/bash
+# Program:
+#    Use function to repeat information.
+# History:
+# 2005/08/29    VBird    First release
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
+export PATH
+
+function printit(){
+    echo -n "Your choice is "     # 加上 -n 可以不断行继续在同一行显示
+}
+
+echo "This program will print your selection !"
+case $1 in
+  "one")
+    printit; echo $1 | tr 'a-z' 'A-Z'  # 将参数做大小写转换！
+    ;;
+  "two")
+    printit; echo $1 | tr 'a-z' 'A-Z'
+    ;;
+  "three")
+    printit; echo $1 | tr 'a-z' 'A-Z'
+    ;;
+  *)
+    echo "Usage $0 {one|two|three}"
+    ;;
+esac
+复制代码
+以上面的例子来说，鸟哥做了一个函数名称为 printit ，所以，当我在后续的程序段里面， 只要运行 printit 的话，就表示我的 shell script 要去运行『 function printit .... 』 里面的那几个程序段落罗！当然罗，上面这个例子举得太简单了，所以你不会觉得 function 有什么好厉害的， 不过，如果某些程序码一再地在 script 当中重复时，这个 function 可就重要的多罗～ 不但可以简化程序码，而且可以做成类似『模块』的玩意儿，真的很棒啦！
+
+ 
+
+另外， function 也是拥有内建变量的～他的内建变量与 shell script 很类似， 函数名称代表示 $0 ，而后续接的变量也是以 $1, $2... 来取代的～ 这里很容易搞错喔～因为『 function fname() { 程序段 } 』内的 $0, $1... 等等与 shell script 的 $0 是不同的。以上面 sh12-2.sh 来说，假如我下达：『 sh sh12-2.sh one 』 这表示在 shell script 内的 $1 为 "one" 这个字串。但是在 printit() 内的 $1 则与这个 one 无关。 我们将上面的例子再次的改写一下，让你更清楚！
+
+复制代码
+[root@www scripts]# vi sh12-3.sh
+#!/bin/bash
+# Program:
+#    Use function to repeat information.
+# History:
+# 2005/08/29    VBird    First release
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
+export PATH
+
+function printit(){
+    echo "Your choice is $1"   # 这个 $1 必须要参考底下命令的下达
+}
+
+echo "This program will print your selection !"
+case $1 in
+  "one")
+    printit 1  # 请注意， printit 命令后面还有接参数！
+    ;;
+  "two")
+    printit 2
+    ;;
+  "three")
+    printit 3
+    ;;
+  *)
+    echo "Usage $0 {one|two|three}"
+    ;;
+esac
+复制代码
+在上面的例子当中，如果你输入『 sh sh12-3.sh one 』就会出现『 Your choice is 1 』的字样～ 为什么是 1 呢？因为在程序段落当中，我们是写了『 printit 1 』那个 1 就会成为 function 当中的 $1 喔～ 这样是否理解呢？ function 本身其实比较困难一点，如果你还想要进行其他的撰写的话。 不过，我们仅是想要更加了解 shell script 而已，所以，这里看看即可～了解原理就好罗～ ^_^
