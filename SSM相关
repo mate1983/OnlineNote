@@ -1,0 +1,23 @@
+There are 3 groups of caching annotations depend on amount of handled keys:
+
+*AssignCache - the cache key is constant and doesn't depends on method's parameters, usually used on method without parameter i.e. getAllUsers()
+*SingleCache - the cache key is created using annotated method's parameters, result is stored under single key, method's parameter of type List cannot be used to generate cache key
+*MultiCache - the cache is created using annotated method's parameters, exactly one of the parameter has to be of type List, result also has to be a List, each element from the result List is stored under dedicated cache key
+In SSM there is no direct communication between Application 1 and Application 2. To make it work correctly both applications have to use the same Simple Spring Memcached configuration including memcached servers and provider configuration so they will use the same memcached servers. The applications can be deployed on separated servers. When one application put a key to the memcached using ReadThroughSingleCache or UpdateThroughSingleCache the other one can access it while using ReadThroughSingleCache. The signature of update method should be to use method parameter as a new value:
+
+@UpdateThroughSingleCache(namespace="userPoints")
+public void updateUserPoints(@ParameterKeyValueProvider String userId, @ParameterDataUpdateContent Integer newPoints)
+{
+      //make database update
+}
+If you want to use return value to update annotate the method with @ReturnDataUpdateContent.
+
+1、ParameterKeyValueProvider 还有一个参数order，可以控制多个参数之间的顺序，如下
+@ReadThroughMultiCache(namespace = "external_category_list", expiration = 3600)
+public List getData2(@ParameterValueKeyProvider(order=0) List s,@ParameterValueKeyProvider(order=1)String prefix) 
+执行：dao.getData2(list,"PP")
+将会形成如下key:
+external_category_list:3/PP external_category_list:4/PP external_category_list:5/PP
+
+2、如果入参有List,且需要将此参数做为cache key,采用*SingleCache将会异常。
+3、*MultiCache的返回值必须为List.
