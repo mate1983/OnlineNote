@@ -21,3 +21,9 @@ external_category_list:3/PP external_category_list:4/PP external_category_list:5
 
 2、如果入参有List,且需要将此参数做为cache key,采用*SingleCache将会异常。
 3、*MultiCache的返回值必须为List.
+4、更新缓存时，有两个注解：@ParameterDataUpdateContent 用参数更新缓存及@ReturnDataUpdateContent 用返回值更新缓存。用法如下:
+@UpdateSingleCache(namespace = NS, expiration = 3600)
+	@ReturnDataUpdateContent
+	public Map update(@ParameterValueKeyProvider Long id) 
+或者
+	public Map update(@ParameterValueKeyProvider Long id，@ParameterDataUpdateContent Map map) 
