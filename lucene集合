@@ -32,3 +32,5 @@ deltaImportQuery引用的必须是自己的pk
 
 
 4、solr javascript 客户端：https://github.com/evolvingweb/ajax-solr
+
+5、solr jsonp :http://192.168.0.126:5080/space/suggest?wt=json&json.wrf=?json.wrf:使用jsonp跨域请求格式。注意问号。solr官方提供回调函数。问号会自动识别回调函数。有的文章写得是json.wrf=callback。之后自定义一个callback回调函数。这样的话。success函数就不会执行。我就一直纠结这个问题。之后把回调函数去掉。就行了。
