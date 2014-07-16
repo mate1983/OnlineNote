@@ -1,0 +1,31 @@
+实战 Lucene，第 1 部分: 初识 Lucene
+http://www.ibm.com/developerworks/cn/java/j-lo-lucene1/
+
+深入 Lucene 索引机制
+http://www.ibm.com/developerworks/cn/java/wa-lucene/
+
+Apache Solr DIH的Entity配置
+query是获取全部数据的SQL
+deltaImportQuery是获取增量数据时使用的SQL
+deltaQuery是获取pk的SQL
+parentDeltaQuery是获取父Entity的pk的SQL
+ 
+Full Import工作原理：
+执行本Entity的Query，获取所有数据；
+针对每个行数据Row，获取pk，组装子Entity的Query；
+执行子Entity的Query，获取子Entity的数据。
+ 
+Delta Import工作原理：
+查找子Entity，直到没有为止；
+执行Entity的deltaQuery，获取变化数据的pk；
+合并子Entity parentDeltaQuery得到的pk；
+针对每一个pk Row，组装父Entity的parentDeltaQuery；
+执行parentDeltaQuery，获取父Entity的pk；
+执行deltaImportQuery，获取自身的数据；
+如果没有deltaImportQuery，就组装Query
+ 
+限制：
+子Entity的query必须引用父Entity的pk
+子Entity的parentDeltaQuery必须引用自己的pk
+子Entity的parentDeltaQuery必须返回父Entity的pk
+deltaImportQuery引用的必须是自己的pk
