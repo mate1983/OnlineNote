@@ -1,10 +1,10 @@
-实战 Lucene，第 1 部分: 初识 Lucene
+1、实战 Lucene，第 1 部分: 初识 Lucene
 http://www.ibm.com/developerworks/cn/java/j-lo-lucene1/
 
-深入 Lucene 索引机制
+2、深入 Lucene 索引机制
 http://www.ibm.com/developerworks/cn/java/wa-lucene/
 
-Apache Solr DIH的Entity配置
+3、Apache Solr DIH的Entity配置
 query是获取全部数据的SQL
 deltaImportQuery是获取增量数据时使用的SQL
 deltaQuery是获取pk的SQL
@@ -29,3 +29,6 @@ Delta Import工作原理：
 子Entity的parentDeltaQuery必须引用自己的pk
 子Entity的parentDeltaQuery必须返回父Entity的pk
 deltaImportQuery引用的必须是自己的pk
+
+
+4、solr javascript 客户端：https://github.com/evolvingweb/ajax-solr
