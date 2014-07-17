@@ -14,6 +14,8 @@
 			   	 title: 'DataGrid ',  
 					 width: 'auto',  
 			     height: 'auto',  
+			     pagination: true,
+			     rownumbers:true,
 			     fitColumns: 'true',
 			     autoRowHeight:'true',
 			     columns:[[                  
@@ -38,7 +40,20 @@
 			   });
 			   
 		   $('#query').click(function(){
-		   				var postData = { "q": "product_name:"+$('#keyword').val()};		   			
+		   				 getData(1,10);
+		      });
+       
+       $('#datalist').datagrid('getPager').pagination({ 
+            onSelectPage: function (pageNumber, pageSize) { 
+                alert('onSelectPage pageNumber:' + pageNumber + ',pageSize:' + pageSize); 
+                getData(pageNumber, pageSize); 
+            } 
+        });
+    }); 
+    
+    function getData(page,rows){
+    					var start = (page-1)*rows;
+    					var postData = { "q": "product_name:"+$('#keyword').val(),"start":start,"rows":rows};		   			
 		   				alert(encodeURIComponent(postData.q));
 			        $.ajax({
 			        		 type: 'POST',
@@ -57,11 +72,9 @@
 			                 }); 
 			                 */               
 			             }
-			        });  		        
-		      });
-       
-    }); 
-    
+			        });  		       
+    	
+    }
   
 </script>
 </head>
