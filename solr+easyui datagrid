@@ -1,0 +1,81 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" type="text/css" href="css/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="css/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="css/form.css">
+<script type="text/javascript" src="jquery1.10.2.js"></script>
+<script type="text/javascript" src="jquery.easyui.min.js"></script>
+<script type="text/javascript" src="jquery.json-2.4.js"></script>
+<script type="text/javascript">
+
+ $(document).ready(function(){
+			 	$('#datalist').datagrid({
+			   	 title: 'DataGrid ',  
+					 width: 'auto',  
+			     height: 'auto',  
+			     fitColumns: 'true',
+			     autoRowHeight:'true',
+			     columns:[[                  
+			               {field:'id',title: 'id',align: 'center',
+			               	 formatter:function(value,row,index){					               	             	 
+			               	 		return "<a  href='" + row.product_link +"'>"+value+"</a>";
+			               	 }
+			               },
+			               {field:'product_name',title: 'name',align: 'center'}, 
+			               {field:'product_img_path',title: 'img',align: 'center',
+			               	 formatter:function(value,row,index){					               	             	 
+			               	 		return "<img id='test' src='" + value +"'/>";
+			               	 }
+			               },			               
+			               {field:'category_ids',title: 'category_ids',align: 'center'},
+			               {field:'category_names',title: 'category_names',align: 'center'},
+			               {field:'label_ids',title: 'category_ids',align: 'center'},
+			               {field:'label_names',title: 'category_names',align: 'center'},
+			               {field:'re_price',title: 're_price',align: 'center'},
+			               {field:'ori_price',title: 'ori_price',align: 'center'}                
+			           ]]
+			   });
+			   
+		   $('#query').click(function(){
+		   				var postData = { "q": "product_name:"+$('#keyword').val()};		   			
+		   				alert(encodeURIComponent(postData.q));
+			        $.ajax({
+			        		 type: 'POST',
+			             url:'http://localhost:8080/solr/mall-wlt/select?wt=json&json.wrf=?',
+			             data:postData,
+			             dataType:'jsonp',         
+			             success:function(data){
+			                //$("#myDiv").html(data.response.docs[0].category_id3);
+			                var test = {"total":data.response.numFound,"rows":data.response.docs};
+			                // alert(test.rows[0].id);
+			                 $('#datalist').datagrid("loadData",test);
+			                 /*
+			                 $.each(data.response.docs,function(i,v){
+			               
+			                    alert(v.product_name);
+			                 }); 
+			                 */               
+			             }
+			        });  		        
+		      });
+       
+    }); 
+    
+  
+</script>
+</head>
+<body>
+<div>
+keyword:
+<input id='keyword' type='text'>
+</input><input id='query' type='button' value='query'/>
+</div>
+<div id="myDiv"><h2>solr query result display</h2></div>
+<div id="datagrid">
+			<table id="datalist">
+			</table>
+</div>
+		
+</body>
+</html>
