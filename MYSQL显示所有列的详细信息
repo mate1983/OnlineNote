@@ -1,3 +1,42 @@
 SHOW COLUMNS FROM wlt_external_category
 
 show full fields from wlt_external_category
+
+mysql提供的show table status like ‘%xxx’可以方便的查看某些表的信息，但是使用这个语句没法对结果集进行排序，不如我想看数据库中那个表中的数据量最大就办不到了？
+
+其实可以通过访问information_schema数据库获得show table status的相关信息
+
+比如:
+
+SELECT * FROM information_schema.tables WHERE table_schema = DATABASE();
+获得按数据量排序的信息：
+
+SELECT table_name,ENGINE,VERSION,ROW_FORMAT,table_rows,AVG_ROW_LENGTH,
+Data_length,Max_data_length,Index_length,Data_free,AUTO_INCREMENT,
+Create_time,Update_time,Check_time,table_collation,CHECKSUM,
+Create_options,table_comment FROM information_schema.TABLES
+WHERE table_schema = DATABASE()
+ORDER BY table_rows DESC
+也可以指定数据库：
+
+SELECT table_name,Engine,Version,Row_format,table_rows,Avg_row_length,
+Data_length,Max_data_length,Index_length,Data_free,Auto_increment,
+Create_time,Update_time,Check_time,table_collation,Checksum,
+Create_options,table_comment FROM information_schema.tables
+WHERE table_schema = 'yourdb';
+还可以方便的查询到那些表的引擎不是InnoDB，如下sql语句：
+
+SELECT table_name,Engine,Version,Row_format,table_rows,Avg_row_length,
+Data_length,Max_data_length,Index_length,Data_free,Auto_increment,
+Create_time,Update_time,Check_time,table_collation,Checksum,
+Create_options,table_comment FROM information_schema.tables
+WHERE table_schema = 'yourdb' and Engine != 'InnoDB'
+
+
+查看表的索引 
+SELECT
+    *
+FROM
+    information_schema.statistics
+WHERE
+    table_name  = 'wlt_external_category'
