@@ -1,0 +1,50 @@
+JBoss 系列五十七：JBoss 7/WildFly Virtual Directory Mapping
+http://blog.csdn.net/kylinsoong/article/details/16986831
+
+概述
+我们经常有这样的需求，假設有個 Test.war 部署至JBoss后, 在浏览器输入
+       http://xxx.xxx.xx/Test/mypic/a.jpg
+可看到图片a.jpg，而且不將a.jpg打包放在Test.war里面，a.jpg是放置在外部目录，例如/tmp/img。Weblogic的http://docs.oracle.com/cd/E11035_01/wls100/webapp/weblogic_xml.html#wp1039396实现这一功能，他是自己集成了一套方法，用户通过配置可以完成，大致配置如下：
+[html] view plaincopy在CODE上查看代码片派生到我的代码片
+<virtual-directory-mapping>  
+     <local-path>c:/usr/gifs</local-path>  
+     <url-pattern>/images/*</url-pattern>  
+     <url-pattern>*.jpg</url-pattern>  
+</virtual-directory-mapping>  
+<virtual-directory-mapping>  
+     <local-path>c:/usr/common_jsps.jar</local-path>  
+     <url-pattern>*.jsp</url-pattern>  
+</virtual-directory-mapping>  
+
+JBoss默认没有这种设置，我们需要通过自定义Servlet来完成。
+JBoss 7/WildFly Virtual Directory Mapping
+假设/tmp/img下有大量图片，我们需要在JBoss中通过http://localhost:8080/virtual-directory-mapping/image/*来获取/tmp/img下的图片。
+假如/tmp/img下有图片jboss_logo.png，我们则可以通过http://localhost:8080/virtual-directory-mapping/image/jboss_logo.png访问到/tmp/img下的jboss_logo.png。
+
+具体实施非常简单，我们通过自定义应用来完成（Servlet中获取a.jpg的输入流，通过response的OutputStream写给请求端），具体如https://github.com/kylinsoong/wildfly-architecture/.../FileServlet.java所示，我们定义basePath的value为/tmp/img
+  @WebServlet(urlPatterns = "/image/*", initParams = { @WebInitParam(name = "basePath", value = "/tmp/img") })
+则当部署应用virtual-directory-mapping到JBoss后，通过
+  http://localhost:8080/virtual-directory-mapping/image/jboss_logo.png
+可以获取到/tmp/img下面的jboss_logo.png。
+
+
+另外
+  https://community.jboss.org/thread/173207
+  http://balusc.blogspot.in/2009/02/fileservlet-supporting-resume-and.html
+也涉及到此问题，也可供参考。
+
+JBoss 7/WildFly Virtual Directory Mapping所使用到的代码链接https://github.com/kylinsoong/wildfly-architecture/tree/master/virtual-directory-mapping
+使用系列一所示的方法，克隆编译生成virtual-directory-mapping.war，使用系列三所示的方法部署virtual-directory-mapping.war到JBoss.
+其他
+我们还可以使用其它方法完成这一需求。
+创建 Symbolic links
+在Linux操作系统，我们创建 Symbolic links可以满足这一需求，比如在Linux系统/tmp/img下有jboss_logo.png，我们执行如下命令：
+[html] view plaincopy在CODE上查看代码片派生到我的代码片
+ln -s /tmp/img $DEPLOYMENT/test.war/img  
+创建Symbolic links，然后可以通过test.war访问jboss_logo.png，如下：
+http://localhost:8080/test/img/jboss_logo.png
+
+将图片放置于welcome-content下
+JBOSS_HOME下有welcome-content目录，将上面img目录放置于JBOSS_HOME/welcome-content下，我们可以通过
+     http://localhost:8080/img/jboss_logo.png
+获取jboss_logo.png。
