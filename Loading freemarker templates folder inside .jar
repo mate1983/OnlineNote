@@ -1,0 +1,11 @@
+http://stackoverflow.com/questions/14753125/loading-freemarker-templates-folder-inside-jar
+
+Have a look at
+
+void setClassForTemplateLoading(Class cl, String prefix);
+...in the FreeMarker manual chapter about template loading.
+
+Example:
+
+cfg.setClassForTemplateLoading(this.getClass(), "/templates");
+...if your templates is located in the templates package relative to the root of the current class.
