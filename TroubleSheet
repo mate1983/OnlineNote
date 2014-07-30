@@ -3,3 +3,7 @@ TS-Jboss+IE+easyui-datebox 提交异常（2014-6-26）
 
 Spring MVC 404找不到目标JSP(2014-7-14)
 因导入错包，致使转向一直指向请求的.do，对比了一个正常的，代码层面完成一样，最后发现导入的类错误，原应导入的：org.springframework.web.serlet.ModelAndView导成了org.springframework.web.portlet.ModelAndView,要小心这两个包下面的类，很多都是同名且同方法，坑！！！
+
+jstl 1.2在关闭EL表达式后，标签失败(2014-7-30)
+http://docs.oracle.com/javaee/1.4/tutorial/doc/JSPIntro7.html
+1.0的时候，不是用el表达式进行解析，所以不会出错，如果升级到1.2后，再关闭EL表达式C标签里面的${}就会解析失败。
