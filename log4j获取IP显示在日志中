@@ -1,0 +1,36 @@
+http://www.cnblogs.com/zyfxlv/archive/2012/09/02/log4j.html
+
+log4j获取IP显示在日志中
+要想实现获取IP并显示在log中必须先了解log4j自带的两个类MDC和NDC
+
+ 
+
+NDC和MDC是log4j用于存储应用程序的上下文信息（context infomation），从而便于在log中使用这些上下文信息。
+
+NDC采用了一个类似栈的机制来push存储上下文信息，每一个线程都独立地储存上下文信息。比如说一个servlet就可以针对每一个request创建对应的NDC，储存客户端地址等等信息。相关的信息使用NDC.push(message);
+
+在log的时候将信息输出。在相应的PatternLayout中使用”%x”来输出存储的上下文信息
+
+例如：String remoteAddr = request.getRemoteAddr();
+
+NDC.push(remoteAddr);
+
+在log4j.properties文件中作如下的配置即可
+
+log4j.appender.console.layout.ConversionPattern=%-d{yyyy/MM/dd HH:mm:ss,SSS} [%X] -[%c]-[%p] %m%n
+
+ 
+
+MDC内部使用了类似map的机制来存储信息，相对应的方法，MDC.put(key, value);在配置PatternLayout的时候使用：%x{key}来输出对应的value
+
+例如：String remoteAddr = request.getRemoteAddr();
+
+MDC.put("ip", remoteAddr); 
+
+ 
+
+在log4j.properties文件中作如下的配置即可
+
+log4j.appender.console.layout.ConversionPattern=%-d{yyyy/MM/dd HH:mm:ss,SSS} [%X{ip}] -[%c]-[%p] %m%n
+
+如果在项目中有过滤器，你可以把获取ip 的方法直接定义在过滤器中，然后在配置文件中配置获取ip的显示就可以了
